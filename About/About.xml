@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ModMetaData>
+  <name>Smart Defense Protocols</name>
+  <author>SeK1rO</author>
+  <packageId>YourName.SmartDefenseProtocols</packageId>
+  <supportedVersions>
+    <li>1.4</li>
+    <li>1.5</li>
+  </supportedVersions>
+  <description>Добавляет протоколы безопасности DEFCON (Зеленый, Желтый, Красный) для автоматизации обороны базы.</description>
+</ModMetaData>
