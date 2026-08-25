@@ -1,0 +1,798 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using UnityEngine;
+using Verse;
+using Verse.Sound;
+using RimWorld;
+using HarmonyLib;
+
+namespace SmartDefenseProtocols
+{
+public static class CompFlickableExtensions
+{
+private static readonly FieldInfo wantSwitchOnField = typeof(CompFlickable).GetField("wantSwitchOn", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
+
+public static bool GetWantSwitchOn(this CompFlickable flick)
+{
+if (flick == null) return false;
+if (wantSwitchOnField != null)
+{
+return (bool)wantSwitchOnField.GetValue(flick);
+}
+return flick.SwitchIsOn;
+}
+
+public static void SetWantSwitchOn(this CompFlickable flick, bool value)
+{
+if (flick == null) return;
+if (wantSwitchOnField != null)
+{
+wantSwitchOnField.SetValue(flick, value);
+}
+}
+}
+
+[StaticConstructorOnStartup]
+public static class SmartDefensePatches
+{
+static SmartDefensePatches()
+{
+var harmony = new Harmony("com.smartdefense.protocols");
+harmony.PatchAll();
+}
+}
+
+[HarmonyPatch(typeof(CompFlickable), nameof(CompFlickable.DoFlick))]
+public static class CompFlickable_DoFlick_Patch
+{
+public static void Postfix(CompFlickable __instance)
+{
+if (__instance?.parent == null) return;
+Building b = __instance.parent as Building;
+if (b == null) return;
+
+if (DefenseManager.IsTurret(b))
+{
+bool targetState = __instance.SwitchIsOn;
+DefenseManager.SyncTurretPowerAndVisuals(b, targetState);
+}
+}
+}
+
+public class Building_RallyPoint : Building
+{
+// Custom rally point behavior for colonists during Red Code
+}
+
+public enum AlertLevel { Green, Yellow, Red }
+public enum PawnRole { Auto, Colonist, Combatant }
+
+public class DefenseSettings : ModSettings
+{
+public static bool AutoDraftCombatants = true;
+public static bool AutoToggleTurrets = true;
+public static bool InstantTurretToggle = false;
+public static bool AutoRedOnRaid = true;
+public static bool AutoYellowOnRaidEnd = true;
+public static bool ManualModeOnly = false;
+
+public override void ExposeData()
+{
+base.ExposeData();
+Scribe_Values.Look(ref AutoDraftCombatants, "AutoDraftCombatants", true);
+Scribe_Values.Look(ref AutoToggleTurrets, "AutoToggleTurrets", true);
+Scribe_Values.Look(ref InstantTurretToggle, "InstantTurretToggle", false);
+Scribe_Values.Look(ref AutoRedOnRaid, "AutoRedOnRaid", true);
+Scribe_Values.Look(ref AutoYellowOnRaidEnd, "AutoYellowOnRaidEnd", true);
+Scribe_Values.Look(ref ManualModeOnly, "ManualModeOnly", false);
+}
+}
+
+public class GameComponent_DefenseProtocols : GameComponent
+{
+public AlertLevel currentAlert = AlertLevel.Green;
+
+public string yellowDefaultCivilian = "";
+public string yellowDefaultCombatant = "";
+public string yellowDefaultAnimals = "";
+public string yellowDefaultMechs = "";
+
+public string redDefaultCivilian = "";
+public string redDefaultCombatant = "";
+public string redDefaultAnimals = "";
+public string redDefaultMechs = "";
+
+public Dictionary<string, PawnRole="">
+	pawnRoles = new Dictionary<string, PawnRole="">
+		();
+		public Dictionary<string, string="">
+			pawnYellowAreas = new Dictionary<string, string="">
+				();
+				public Dictionary<string, string="">
+					pawnRedAreas = new Dictionary<string, string="">
+						();
+
+						public Dictionary<string, string="">
+							animalYellowAreas = new Dictionary<string, string="">
+								();
+								public Dictionary<string, string="">
+									animalRedAreas = new Dictionary<string, string="">
+										();
+
+										public Dictionary<string, string="">
+											mechYellowAreas = new Dictionary<string, string="">
+												();
+												public Dictionary<string, string="">
+													mechRedAreas = new Dictionary<string, string="">
+														();
+
+														public Dictionary<string, string="">
+															originalAreas = new Dictionary<string, string="">
+																();
+
+																public GameComponent_DefenseProtocols(Game game) : base() { }
+
+																public override void ExposeData()
+																{
+																base.ExposeData();
+																Scribe_Values.Look(ref currentAlert, "currentAlert", AlertLevel.Green);
+
+																Scribe_Values.Look(ref yellowDefaultCivilian, "yellowDefaultCivilian", "");
+																Scribe_Values.Look(ref yellowDefaultCombatant, "yellowDefaultCombatant", "");
+																Scribe_Values.Look(ref yellowDefaultAnimals, "yellowDefaultAnimals", "");
+																Scribe_Values.Look(ref yellowDefaultMechs, "yellowDefaultMechs", "");
+
+																Scribe_Values.Look(ref redDefaultCivilian, "redDefaultCivilian", "");
+																Scribe_Values.Look(ref redDefaultCombatant, "redDefaultCombatant", "");
+																Scribe_Values.Look(ref redDefaultAnimals, "redDefaultAnimals", "");
+																Scribe_Values.Look(ref redDefaultMechs, "redDefaultMechs", "");
+
+																Scribe_Collections.Look(ref pawnRoles, "pawnRoles", LookMode.Value, LookMode.Value);
+																Scribe_Collections.Look(ref pawnYellowAreas, "pawnYellowAreas", LookMode.Value, LookMode.Value);
+																Scribe_Collections.Look(ref pawnRedAreas, "pawnRedAreas", LookMode.Value, LookMode.Value);
+
+																Scribe_Collections.Look(ref animalYellowAreas, "animalYellowAreas", LookMode.Value, LookMode.Value);
+																Scribe_Collections.Look(ref animalRedAreas, "animalRedAreas", LookMode.Value, LookMode.Value);
+
+																Scribe_Collections.Look(ref mechYellowAreas, "mechYellowAreas", LookMode.Value, LookMode.Value);
+																Scribe_Collections.Look(ref mechRedAreas, "mechRedAreas", LookMode.Value, LookMode.Value);
+
+																Scribe_Collections.Look(ref originalAreas, "originalAreas", LookMode.Value, LookMode.Value);
+
+																if (Scribe.mode == LoadSaveMode.LoadingVars || Scribe.mode == LoadSaveMode.PostLoadInit)
+																{
+																yellowDefaultCivilian = yellowDefaultCivilian ?? "";
+																yellowDefaultCombatant = yellowDefaultCombatant ?? "";
+																yellowDefaultAnimals = yellowDefaultAnimals ?? "";
+																yellowDefaultMechs = yellowDefaultMechs ?? "";
+
+																redDefaultCivilian = redDefaultCivilian ?? "";
+																redDefaultCombatant = redDefaultCombatant ?? "";
+																redDefaultAnimals = redDefaultAnimals ?? "";
+																redDefaultMechs = redDefaultMechs ?? "";
+
+																pawnRoles = pawnRoles ?? new Dictionary<string, PawnRole="">
+																	();
+																	pawnYellowAreas = pawnYellowAreas ?? new Dictionary<string, string="">
+																		();
+																		pawnRedAreas = pawnRedAreas ?? new Dictionary<string, string="">
+																			();
+																			animalYellowAreas = animalYellowAreas ?? new Dictionary<string, string="">
+																				();
+																				animalRedAreas = animalRedAreas ?? new Dictionary<string, string="">
+																					();
+																					mechYellowAreas = mechYellowAreas ?? new Dictionary<string, string="">
+																						();
+																						mechRedAreas = mechRedAreas ?? new Dictionary<string, string="">
+																							();
+																							originalAreas = originalAreas ?? new Dictionary<string, string="">
+																								();
+																								}
+																								}
+
+																								public static GameComponent_DefenseProtocols Instance
+																								{
+																								get
+																								{
+																								if (Current.Game == null) return null;
+																								return Current.Game.GetComponent<GameComponent_DefenseProtocols>
+																									();
+																									}
+																									}
+																									}
+
+																									public static class DefenseManager
+																									{
+																									public static AlertLevel CurrentAlert
+																									{
+																									get => GameComponent_DefenseProtocols.Instance?.currentAlert ?? AlertLevel.Green;
+																									set
+																									{
+																									var comp = GameComponent_DefenseProtocols.Instance;
+																									if (comp != null) comp.currentAlert = value;
+																									}
+																									}
+
+																									public static void SetAlertLevel(AlertLevel newLevel, Map map = null)
+																									{
+																									if (map == null) map = Find.CurrentMap;
+																									AlertLevel previousLevel = CurrentAlert;
+																									CurrentAlert = newLevel;
+
+																									if (newLevel != AlertLevel.Green && previousLevel == AlertLevel.Green)
+																									{
+																									SaveOriginalAreas(map);
+																									}
+
+																									ApplyAlertLevel(newLevel, map);
+
+																									if (newLevel == AlertLevel.Green)
+																									{
+																									RestoreOriginalAreas(map);
+																									UndraftAllColonists(map);
+																									}
+
+																									PlayAlertSound(newLevel);
+
+																									string msg = (newLevel == AlertLevel.Green)
+																									? "SmartDefense.Msg.GreenSwitched".Translate()
+																									: "SmartDefense.Msg.LevelSwitched".Translate(GetAlertLabel(newLevel));
+
+																									Messages.Message(msg, MessageTypeDefOf.CautionInput, false);
+																									}
+
+																									public static void UndraftAllColonists(Map map)
+																									{
+																									if (map == null) return;
+																									foreach (Pawn p in map.mapPawns.AllPawns)
+																									{
+																									if (p.Faction == Faction.OfPlayer && p.drafter != null && p.Drafted)
+																									{
+																									p.drafter.Drafted = false;
+																									}
+																									}
+																									}
+
+																									public static string GetAlertLabel(AlertLevel level)
+																									{
+																									switch (level)
+																									{
+																									case AlertLevel.Green: return "SmartDefense.Alert.Green".Translate();
+																									case AlertLevel.Yellow: return "SmartDefense.Alert.Yellow".Translate();
+																									case AlertLevel.Red: return "SmartDefense.Alert.Red".Translate();
+																									default: return "SmartDefense.Alert.Green".Translate();
+																									}
+																									}
+
+																									public static void SaveOriginalAreas(Map map)
+																									{
+																									if (map == null) return;
+																									var comp = GameComponent_DefenseProtocols.Instance;
+																									if (comp == null) return;
+
+																									foreach (Pawn p in map.mapPawns.AllPawns)
+																									{
+																									if (p.Faction != Faction.OfPlayer) continue;
+																									string id = p.ThingID;
+																									if (p.playerSettings != null)
+																									{
+																									Area area = p.playerSettings.AreaRestrictionInPawnCurrentMap;
+																									comp.originalAreas[id] = area != null ? area.Label : "";
+																									}
+																									}
+																									}
+
+																									public static void RestoreOriginalAreas(Map map)
+																									{
+																									if (map == null) return;
+																									var comp = GameComponent_DefenseProtocols.Instance;
+																									if (comp == null) return;
+
+																									foreach (Pawn p in map.mapPawns.AllPawns)
+																									{
+																									if (p.Faction != Faction.OfPlayer) continue;
+																									string id = p.ThingID;
+																									if (p.playerSettings != null)
+																									{
+																									if (comp.originalAreas.TryGetValue(id, out string areaLabel) && !string.IsNullOrEmpty(areaLabel))
+																									{
+																									p.playerSettings.AreaRestrictionInPawnCurrentMap = FindAreaByName(map, areaLabel);
+																									}
+																									else
+																									{
+																									p.playerSettings.AreaRestrictionInPawnCurrentMap = null;
+																									}
+																									}
+																									}
+																									}
+
+																									public static void ApplyAlertLevel(AlertLevel level, Map map)
+																									{
+																									if (map == null) return;
+																									foreach (Pawn p in map.mapPawns.AllPawns)
+																									{
+																									if (p.Faction != Faction.OfPlayer) continue;
+
+																									if (p.RaceProps != null && p.RaceProps.Humanlike)
+																									{
+																									ApplyHumanlikeArea(p, level, map);
+																									}
+																									else if (p.RaceProps != null && p.RaceProps.Animal)
+																									{
+																									ApplyAnimalArea(p, level, map);
+																									}
+																									else if (IsMechOrDrone(p))
+																									{
+																									ApplyMechArea(p, level, map);
+																									}
+																									}
+
+																									if (DefenseSettings.AutoToggleTurrets)
+																									{
+																									ToggleTurrets(map, level != AlertLevel.Green);
+																									}
+																									}
+
+																									public static bool IsMechOrDrone(Pawn p)
+																									{
+																									if (p == null || p.RaceProps == null) return false;
+																									return p.RaceProps.IsMechanoid;
+																									}
+
+																									private static void ApplyHumanlikeArea(Pawn p, AlertLevel level, Map map)
+																									{
+																									if (p.playerSettings == null) return;
+																									var comp = GameComponent_DefenseProtocols.Instance;
+																									if (comp == null) return;
+
+																									string id = p.ThingID;
+																									bool combatant = IsCombatant(p);
+
+																									if (level == AlertLevel.Green) return;
+
+																									string targetAreaLabel = "";
+																									if (level == AlertLevel.Yellow)
+																									{
+																									if (!comp.pawnYellowAreas.TryGetValue(id, out targetAreaLabel) || string.IsNullOrEmpty(targetAreaLabel))
+																									{
+																									targetAreaLabel = combatant ? comp.yellowDefaultCombatant : comp.yellowDefaultCivilian;
+																									}
+																									}
+																									else if (level == AlertLevel.Red)
+																									{
+																									if (!comp.pawnRedAreas.TryGetValue(id, out targetAreaLabel) || string.IsNullOrEmpty(targetAreaLabel))
+																									{
+																									targetAreaLabel = combatant ? comp.redDefaultCombatant : comp.redDefaultCivilian;
+																									}
+
+																									if (combatant && DefenseSettings.AutoDraftCombatants && p.drafter != null && !p.Downed && !p.InMentalState)
+																									{
+																									p.drafter.Drafted = true;
+																									}
+																									}
+
+																									p.playerSettings.AreaRestrictionInPawnCurrentMap = FindAreaByName(map, targetAreaLabel);
+																									}
+
+																									private static void ApplyAnimalArea(Pawn p, AlertLevel level, Map map)
+																									{
+																									if (p.playerSettings == null) return;
+																									var comp = GameComponent_DefenseProtocols.Instance;
+																									if (comp == null) return;
+
+																									string id = p.ThingID;
+																									if (level == AlertLevel.Green) return;
+
+																									string targetAreaLabel = "";
+																									if (level == AlertLevel.Yellow)
+																									{
+																									if (!comp.animalYellowAreas.TryGetValue(id, out targetAreaLabel) || string.IsNullOrEmpty(targetAreaLabel))
+																									targetAreaLabel = comp.yellowDefaultAnimals;
+																									}
+																									else if (level == AlertLevel.Red)
+																									{
+																									if (!comp.animalRedAreas.TryGetValue(id, out targetAreaLabel) || string.IsNullOrEmpty(targetAreaLabel))
+																									targetAreaLabel = comp.redDefaultAnimals;
+																									}
+
+																									p.playerSettings.AreaRestrictionInPawnCurrentMap = FindAreaByName(map, targetAreaLabel);
+																									}
+
+																									private static void ApplyMechArea(Pawn p, AlertLevel level, Map map)
+																									{
+																									if (p.playerSettings == null) return;
+																									var comp = GameComponent_DefenseProtocols.Instance;
+																									if (comp == null) return;
+
+																									string id = p.ThingID;
+																									if (level == AlertLevel.Green) return;
+
+																									string targetAreaLabel = "";
+																									if (level == AlertLevel.Yellow)
+																									{
+																									if (!comp.mechYellowAreas.TryGetValue(id, out targetAreaLabel) || string.IsNullOrEmpty(targetAreaLabel))
+																									targetAreaLabel = comp.yellowDefaultMechs;
+																									}
+																									else if (level == AlertLevel.Red)
+																									{
+																									if (!comp.mechRedAreas.TryGetValue(id, out targetAreaLabel) || string.IsNullOrEmpty(targetAreaLabel))
+																									targetAreaLabel = comp.redDefaultMechs;
+																									}
+
+																									p.playerSettings.AreaRestrictionInPawnCurrentMap = FindAreaByName(map, targetAreaLabel);
+																									}
+
+																									public static bool IsCombatant(Pawn p)
+																									{
+																									if (p == null) return false;
+																									var comp = GameComponent_DefenseProtocols.Instance;
+																									string id = p.ThingID;
+																									if (comp != null && comp.pawnRoles.TryGetValue(id, out PawnRole role))
+																									{
+																									if (role == PawnRole.Combatant) return true;
+																									if (role == PawnRole.Colonist) return false;
+																									}
+																									if (p.story != null && p.WorkTagIsDisabled(WorkTags.Violent)) return false;
+																									if (p.equipment != null && p.equipment.Primary != null && p.equipment.Primary.def.IsWeapon) return true;
+																									if (p.skills != null && (p.skills.GetSkill(SkillDefOf.Shooting).Level >= 6 || p.skills.GetSkill(SkillDefOf.Melee).Level >= 6)) return true;
+																									return false;
+																									}
+
+																									public static Area FindAreaByName(Map map, string name)
+																									{
+																									if (map == null || string.IsNullOrWhiteSpace(name)) return null;
+																									return map.areaManager.AllAreas.FirstOrDefault(a => a.Label.Equals(name, StringComparison.OrdinalIgnoreCase));
+																									}
+
+																									private static void ToggleTurrets(Map map, bool enable)
+																									{
+																									if (map == null) return;
+
+																									List<Building>
+																										colonistBuildings = map.listerBuildings.allBuildingsColonist;
+																										if (colonistBuildings == null) return;
+
+																										for (int i = 0; i < colonistBuildings.Count; i++)
+        {
+            Building b = colonistBuildings[i];
+            if (!IsTurret(b)) continue;
+
+            CompFlickable flick = b.GetComp<CompFlickable>
+																											();
+
+																											if (flick != null)
+																											{
+																											if (DefenseSettings.InstantTurretToggle)
+																											{
+																											flick.SetWantSwitchOn(enable);
+
+																											Designation existing = map.designationManager.DesignationOn(b, DesignationDefOf.Flick);
+																											if (existing != null)
+																											{
+																											map.designationManager.RemoveDesignation(existing);
+																											}
+
+																											SyncTurretPowerAndVisuals(b, enable);
+																											}
+																											else
+																											{
+																											if (flick.GetWantSwitchOn() != enable)
+																											{
+																											flick.SetWantSwitchOn(enable);
+
+																											Designation existing = map.designationManager.DesignationOn(b, DesignationDefOf.Flick);
+
+																											if (flick.WantsFlick())
+																											{
+																											if (existing == null)
+																											{
+																											map.designationManager.AddDesignation(new Designation(b, DesignationDefOf.Flick));
+																											}
+																											}
+																											else
+																											{
+																											if (existing != null)
+																											{
+																											map.designationManager.RemoveDesignation(existing);
+																											}
+																											}
+																											}
+																											}
+																											}
+																											else
+																											{
+																											SyncTurretPowerAndVisuals(b, enable);
+																											}
+																											}
+																											}
+
+																											public static void SyncTurretPowerAndVisuals(Building b, bool enable)
+																											{
+																											if (b == null) return;
+
+																											CompPowerTrader power = b.GetComp<CompPowerTrader>
+																												();
+																												if (power != null)
+																												{
+																												power.PowerOn = enable;
+																												}
+
+																												if (b.AllComps != null)
+																												{
+																												foreach (var comp in b.AllComps)
+																												{
+																												if (comp == null) continue;
+																												Type t = comp.GetType();
+																												string tName = t.Name;
+
+																												if (tName.Contains("Power") || tName.Contains("Flick") || tName.Contains("Turret"))
+																												{
+																												var propPowerOn = t.GetProperty("PowerOn", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+																												if (propPowerOn != null && propPowerOn.CanWrite)
+																												{
+																												try { propPowerOn.SetValue(comp, enable, null); } catch { }
+																												}
+
+																												var propDesire = t.GetProperty("DesirePowerOn", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+																												if (propDesire != null && propDesire.CanWrite)
+																												{
+																												try { propDesire.SetValue(comp, enable, null); } catch { }
+																												}
+																												}
+																												}
+																												}
+
+																												if (b.Spawned && b.Map != null)
+																												{
+																												b.Map.mapDrawer.MapMeshDirty(b.Position, MapMeshFlagDefOf.Things);
+																												b.Map.overlayDrawer.DisposeHandle(b);
+																												}
+																												}
+
+																												public static bool IsTurret(Building b)
+																												{
+																												if (b == null) return false;
+
+																												if (b is Building_Turret) return true;
+
+																												if (b.def != null)
+																												{
+																												if (b.def.building != null && b.def.building.turretGunDef != null) return true;
+
+																												if (b.def.designationCategory != null &&
+																												b.def.designationCategory.defName.Equals("Security", StringComparison.OrdinalIgnoreCase))
+																												{
+																												if (b.GetComp<CompFlickable>
+																													() != null || b.GetComp<CompPowerTrader>
+																														() != null)
+																														return true;
+																														}
+
+																														string defName = b.def.defName.ToLower();
+																														if (defName.Contains("turret") || defName.Contains("sentry") || defName.Contains("mortar") || defName.Contains("defense"))
+																														{
+																														if (b.GetComp<CompFlickable>
+																															() != null || b.GetComp<CompPowerTrader>
+																																() != null)
+																																return true;
+																																}
+																																}
+
+																																return false;
+																																}
+
+																																private static void PlayAlertSound(AlertLevel level)
+																																{
+																																try
+																																{
+																																SoundDef sd;
+																																switch (level)
+																																{
+																																case AlertLevel.Green: sd = SoundDefOf.Click; break;
+																																case AlertLevel.Yellow: sd = SoundDefOf.Designate_PlanAdd; break;
+																																case AlertLevel.Red: sd = SoundDefOf.Designate_PlanAdd; break;
+																																default: sd = SoundDefOf.Click; break;
+																																}
+																																sd?.PlayOneShotOnCamera();
+																																}
+																																catch { }
+																																}
+																																}
+
+																																public static class UIHelper
+																																{
+																																public static void DrawSolidColor(Rect rect, Color color)
+																																{
+																																GUI.color = color;
+																																GUI.DrawTexture(rect, BaseContent.WhiteTex);
+																																GUI.color = Color.white;
+																																}
+
+																																public static void DrawOutlinedRect(Rect rect, Color color, int thickness = 1)
+																																{
+																																GUI.color = color;
+																																GUI.DrawTexture(new Rect(rect.x, rect.y, rect.width, thickness), BaseContent.WhiteTex);
+																																GUI.DrawTexture(new Rect(rect.x, rect.yMax - thickness, rect.width, thickness), BaseContent.WhiteTex);
+																																GUI.DrawTexture(new Rect(rect.x, rect.y, thickness, rect.height), BaseContent.WhiteTex);
+																																GUI.DrawTexture(new Rect(rect.xMax - thickness, rect.y, thickness, rect.height), BaseContent.WhiteTex);
+																																GUI.color = Color.white;
+																																}
+
+																																public static bool DrawStyledButton(Rect rect, string label, Color baseBg, Color hoverBg, Color border, TextAnchor anchor = TextAnchor.MiddleCenter)
+																																{
+																																bool hovering = Mouse.IsOver(rect);
+
+																																DrawSolidColor(rect, hovering ? hoverBg : baseBg);
+																																DrawOutlinedRect(rect, hovering ? Color.Lerp(border, Color.white, 0.35f) : border);
+
+																																TextAnchor prevAnchor = Text.Anchor;
+																																Text.Anchor = anchor;
+																																Widgets.Label(new Rect(rect.x + 6f, rect.y, rect.width - 12f, rect.height), label);
+																																Text.Anchor = prevAnchor;
+
+																																return Widgets.ButtonInvisible(rect);
+																																}
+																																}
+
+																																public class MainButtonWorker_Defense : MainButtonWorker
+																																{
+																																public override void Activate()
+																																{
+																																Dialog_DefenseSettings window = Find.WindowStack.WindowOfType<Dialog_DefenseSettings>();
+        if (window != null)
+        {
+            Find.WindowStack.TryRemove(window);
+        }
+        else
+        {
+            Find.WindowStack.Add(new Dialog_DefenseSettings());
+        }
+    }
+
+    public override void DoButton(Rect rect)
+    {
+        base.DoButton(rect);
+
+        Color statusColor;
+        switch (DefenseManager.CurrentAlert)
+        {
+            case AlertLevel.Green: statusColor = new Color(0.2f, 0.85f, 0.3f, 0.9f); break;
+            case AlertLevel.Yellow: statusColor = new Color(1f, 0.85f, 0.2f, 0.9f); break;
+            case AlertLevel.Red: statusColor = new Color(1f, 0.25f, 0.25f, 0.9f); break;
+            default: statusColor = Color.white; break;
+        }
+
+        Rect indicatorRect = new Rect(rect.x + 3f, rect.yMax - 3f, rect.width - 6f, 2f);
+        UIHelper.DrawSolidColor(indicatorRect, statusColor);
+
+        TooltipHandler.TipRegion(rect, "SmartDefense.Tip.Protocol".Translate(GetAlertStatusText(DefenseManager.CurrentAlert)));
+    }
+
+    private string GetAlertStatusText(AlertLevel level)
+    {
+        switch (level)
+        {
+            case AlertLevel.Green: return "SmartDefense.Alert.Green".Translate();
+            case AlertLevel.Yellow: return "SmartDefense.Alert.Yellow.Full".Translate();
+            case AlertLevel.Red: return "SmartDefense.Alert.Red.Full".Translate();
+            default: return "SmartDefense.Alert.Green".Translate();
+        }
+    }
+}
+
+public class Dialog_DefenseSettings : Window
+{
+    private int currentTab = 0;
+    private Vector2 scrollPosition = Vector2.zero;
+
+    public override Vector2 InitialSize => new Vector2(920f, 680f);
+
+    public Dialog_DefenseSettings()
+    {
+        this.forcePause = false;
+        this.preventCameraMotion = false;
+        this.absorbInputAroundWindow = false;
+        this.closeOnClickedOutside = false;
+        this.doCloseX = true;
+        this.doCloseButton = true;
+        this.draggable = true;
+    }
+
+    public override void DoWindowContents(Rect inRect)
+    {
+        Listing_Standard listing = new Listing_Standard();
+        listing.Begin(inRect);
+
+        // Title Header Badge
+        Text.Font = GameFont.Medium;
+        string titleText = GetDEFCONHeader();
+        listing.Label(titleText);
+        Text.Font = GameFont.Small;
+        listing.Gap(10f);
+
+        // Tabs
+        Rect tabRect = listing.GetRect(30f);
+        float tabWidth = tabRect.width / 4f;
+
+        if (UIHelper.DrawStyledButton(new Rect(tabRect.x, tabRect.y, tabWidth - 2f, 28f), "SmartDefense.Tab.Main".Translate(), currentTab == 0 ? new Color(0.2f, 0.4f, 0.6f) : new Color(0.15f, 0.15f, 0.15f), Color.gray, Color.white)) currentTab = 0;
+        if (UIHelper.DrawStyledButton(new Rect(tabRect.x + tabWidth, tabRect.y, tabWidth - 2f, 28f), "SmartDefense.Tab.Pawns".Translate(), currentTab == 1 ? new Color(0.2f, 0.4f, 0.6f) : new Color(0.15f, 0.15f, 0.15f), Color.gray, Color.white)) currentTab = 1;
+        if (UIHelper.DrawStyledButton(new Rect(tabRect.x + tabWidth * 2f, tabRect.y, tabWidth - 2f, 28f), "SmartDefense.Tab.Animals".Translate(), currentTab == 2 ? new Color(0.2f, 0.4f, 0.6f) : new Color(0.15f, 0.15f, 0.15f), Color.gray, Color.white)) currentTab = 2;
+        if (UIHelper.DrawStyledButton(new Rect(tabRect.x + tabWidth * 3f, tabRect.y, tabWidth - 2f, 28f), "SmartDefense.Tab.Mechs".Translate(), currentTab == 3 ? new Color(0.2f, 0.4f, 0.6f) : new Color(0.15f, 0.15f, 0.15f), Color.gray, Color.white)) currentTab = 3;
+
+        listing.Gap(10f);
+
+        // Tab content rendering
+        Rect contentRect = listing.GetRect(inRect.height - 130f);
+        switch (currentTab)
+        {
+            case 0: DrawMainTab(contentRect); break;
+            case 1: DrawPawnsTab(contentRect); break;
+            case 2: DrawAnimalsTab(contentRect); break;
+            case 3: DrawMechsTab(contentRect); break;
+        }
+
+        listing.End();
+    }
+
+    private string GetDEFCONHeader()
+    {
+        switch (DefenseManager.CurrentAlert)
+        {
+            case AlertLevel.Green: return "SmartDefense.DEFCON.Green".Translate();
+            case AlertLevel.Yellow: return "SmartDefense.DEFCON.Yellow".Translate();
+            case AlertLevel.Red: return "SmartDefense.DEFCON.Red".Translate();
+            default: return "SmartDefense.DEFCON.Unknown".Translate();
+        }
+    }
+
+    private void DrawMainTab(Rect rect)
+    {
+        Listing_Standard listing = new Listing_Standard();
+        listing.Begin(rect);
+
+        listing.Label("SmartDefense.Header.QuickDEFCON".Translate());
+        Rect btnRect = listing.GetRect(32f);
+        float bw = btnRect.width / 3f;
+
+        if (UIHelper.DrawStyledButton(new Rect(btnRect.x, btnRect.y, bw - 4f, 32f), "SmartDefense.Btn.GreenCode".Translate(), new Color(0.1f, 0.5f, 0.2f), new Color(0.2f, 0.7f, 0.3f), Color.green))
+            DefenseManager.SetAlertLevel(AlertLevel.Green);
+
+        if (UIHelper.DrawStyledButton(new Rect(btnRect.x + bw, btnRect.y, bw - 4f, 32f), "SmartDefense.Btn.YellowCode".Translate(), new Color(0.6f, 0.5f, 0.1f), new Color(0.8f, 0.7f, 0.2f), Color.yellow))
+            DefenseManager.SetAlertLevel(AlertLevel.Yellow);
+
+        if (UIHelper.DrawStyledButton(new Rect(btnRect.x + bw * 2f, btnRect.y, bw - 4f, 32f), "SmartDefense.Btn.RedCode".Translate(), new Color(0.6f, 0.1f, 0.1f), new Color(0.8f, 0.2f, 0.2f), Color.red))
+            DefenseManager.SetAlertLevel(AlertLevel.Red);
+
+        listing.Gap(15f);
+        listing.Label("SmartDefense.Header.AdditionalOptions".Translate());
+
+        listing.CheckboxLabeled("SmartDefense.Opt.ManualModeOnly".Translate(), ref DefenseSettings.ManualModeOnly);
+        listing.CheckboxLabeled("SmartDefense.Opt.AutoDraftCombatants".Translate(), ref DefenseSettings.AutoDraftCombatants);
+        listing.CheckboxLabeled("SmartDefense.Opt.AutoToggleTurrets".Translate(), ref DefenseSettings.AutoToggleTurrets);
+        listing.CheckboxLabeled("SmartDefense.Opt.InstantTurretToggle".Translate(), ref DefenseSettings.InstantTurretToggle);
+        listing.CheckboxLabeled("SmartDefense.Opt.AutoRedOnRaid".Translate(), ref DefenseSettings.AutoRedOnRaid);
+        listing.CheckboxLabeled("SmartDefense.Opt.AutoYellowOnRaidEnd".Translate(), ref DefenseSettings.AutoYellowOnRaidEnd);
+
+        listing.End();
+    }
+
+    private void DrawPawnsTab(Rect rect)
+    {
+        Widgets.Label(rect, "SmartDefense.Tab.Pawns".Translate());
+    }
+
+    private void DrawAnimalsTab(Rect rect)
+    {
+        Widgets.Label(rect, "SmartDefense.Tab.Animals".Translate());
+    }
+
+    private void DrawMechsTab(Rect rect)
+    {
+        Widgets.Label(rect, "SmartDefense.Tab.Mechs".Translate());
+    }
+}
+
+
+}

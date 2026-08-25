@@ -1,21 +1,21 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <Defs>
-  <ThingDef ParentName="BuildingBase">
-    <defName>SmartDefense_RallyPoint</defName>
-    <label>точка сбора обороны</label>
-    <description>Обозначенная точка, куда сбегаются солдаты при Красном коде.</description>
-    <thingClass>SmartDefenseProtocols.Building_RallyPoint</thingClass>
-    <graphicData>
-      <texPath>Things/Building/Misc/Campfire</texPath>
-      <graphicClass>Graphic_Single</graphicClass>
-    </graphicData>
-    <altitudeLayer>Building</altitudeLayer>
-    <statBases>
-      <MaxHitPoints>100</MaxHitPoints>
-      <WorkToBuild>100</WorkToBuild>
-    </statBases>
-    <useHitPoints>True</useHitPoints>
-    <designationCategory>Security</designationCategory>
-    <passability>Standable</passability>
-  </ThingDef>
+	<ThingDef ParentName="BuildingBase">
+		<defName>SmartDefense_RallyPoint</defName>
+		<label>точка сбора обороны</label>
+		<description>Обозначенная точка, куда сбегаются солдаты при Красном коде.</description>
+		<thingClass>SmartDefenseProtocols.Building_RallyPoint</thingClass>
+		<graphicData>
+			<texPath>Things/Building/Misc/Campfire</texPath>
+			<graphicClass>Graphic_Single</graphicClass>
+		</graphicData>
+		<altitudeLayer>Building</altitudeLayer>
+		<statBases>
+			<MaxHitPoints>100</MaxHitPoints>
+			<WorkToBuild>100</WorkToBuild>
+		</statBases>
+		<useHitPoints>True</useHitPoints>
+		<designationCategory>Security</designationCategory>
+		<passability>Standable</passability>
+	</ThingDef>
 </Defs>

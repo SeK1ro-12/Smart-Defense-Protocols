@@ -226,8 +226,8 @@ namespace SmartDefenseProtocols
             PlayAlertSound(newLevel);
 
             string msg = (newLevel == AlertLevel.Green)
-                ? "[SmartDefense] Режим переключен: Зеленый (Норма). Все поселенцы сняты с боевого контроля."
-                : $"[SmartDefense] Режим переключен: {GetAlertLabel(newLevel)}";
+                ? "SmartDefense.Msg.GreenSwitched".Translate()
+                : "SmartDefense.Msg.LevelSwitched".Translate(GetAlertLabel(newLevel));
 
             Messages.Message(msg, MessageTypeDefOf.CautionInput, false);
         }
@@ -248,10 +248,10 @@ namespace SmartDefenseProtocols
         {
             switch (level)
             {
-                case AlertLevel.Green: return "Зеленый (Норма)";
-                case AlertLevel.Yellow: return "Желтый (Угроза)";
-                case AlertLevel.Red: return "Красный (Тревога)";
-                default: return "Зеленый";
+                case AlertLevel.Green: return "SmartDefense.DEFCON.Green".Translate();
+                case AlertLevel.Yellow: return "SmartDefense.DEFCON.Yellow".Translate();
+                case AlertLevel.Red: return "SmartDefense.DEFCON.Red".Translate();
+                default: return "SmartDefense.DEFCON.Unknown".Translate();
             }
         }
 
@@ -666,10 +666,10 @@ namespace SmartDefenseProtocols
         {
             switch (level)
             {
-                case AlertLevel.Green: return "Зеленый (Норма)";
-                case AlertLevel.Yellow: return "Желтый (Повышенная готовность)";
-                case AlertLevel.Red: return "Красный (Боевая тревога)";
-                default: return "Зеленый";
+                case AlertLevel.Green: return "SmartDefense.DEFCON.Green".Translate();
+                case AlertLevel.Yellow: return "SmartDefense.DEFCON.Yellow".Translate();
+                case AlertLevel.Red: return "SmartDefense.DEFCON.Red".Translate();
+                default: return "SmartDefense.DEFCON.Unknown".Translate();
             }
         }
     }
