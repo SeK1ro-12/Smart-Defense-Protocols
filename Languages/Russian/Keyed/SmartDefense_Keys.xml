@@ -1,50 +1,47 @@
-﻿<SmartDefense.Msg.GreenSwitched>[SmartDefense] Режим переключен: Зеленый (Норма). Все поселенцы сняты с боевого контроля.</SmartDefense.Msg.GreenSwitched>
-<SmartDefense.Msg.LevelSwitched>[SmartDefense] Режим переключен: {0}</SmartDefense.Msg.LevelSwitched>
-<SmartDefense.Tip.Protocol>Протокол обороны: {0}</SmartDefense.Tip.Protocol>
-
-<SmartDefense.DEFCON.Green>DEFCON: ЗЕЛЕНЫЙ (НОРМА)</SmartDefense.DEFCON.Green>
-<SmartDefense.DEFCON.Yellow>DEFCON: ЖЕЛТЫЙ (УГРОЗА)</SmartDefense.DEFCON.Yellow>
-<SmartDefense.DEFCON.Red>DEFCON: КРАСНЫЙ (ТРЕВОГА)</SmartDefense.DEFCON.Red>
-<SmartDefense.DEFCON.Unknown>DEFCON: НЕИЗВЕСТНО</SmartDefense.DEFCON.Unknown>
-
-<SmartDefense.Tab.Main>Главная</SmartDefense.Tab.Main>
-<SmartDefense.Tab.Pawns>Поселенцы</SmartDefense.Tab.Pawns>
-<SmartDefense.Tab.Animals>Животные</SmartDefense.Tab.Animals>
-<SmartDefense.Tab.Mechs>Механоиды</SmartDefense.Tab.Mechs>
-
-<SmartDefense.Header.QuickDEFCON>Быстрое управление DEFCON</SmartDefense.Header.QuickDEFCON>
-<SmartDefense.Btn.GreenCode>Зеленый код</SmartDefense.Btn.GreenCode>
-<SmartDefense.Btn.YellowCode>Желтый код</SmartDefense.Btn.YellowCode>
-<SmartDefense.Btn.RedCode>Красный код</SmartDefense.Btn.RedCode>
-
-<SmartDefense.Header.CategoryFallback>Зоны по умолчанию для категорий (Fallback)</SmartDefense.Header.CategoryFallback>
-<SmartDefense.Btn.ResetDefaults>Сбросить зоны на умолчания</SmartDefense.Btn.ResetDefaults>
-<SmartDefense.Msg.ResetDefaultsDone>[SmartDefense] Зоны по умолчанию сброшены на 'Без ограничений'.</SmartDefense.Msg.ResetDefaultsDone>
-
-<SmartDefense.Col.Category>Категория</SmartDefense.Col.Category>
-<SmartDefense.Col.YellowCode>Жёлтый код</SmartDefense.Col.YellowCode>
-<SmartDefense.Col.RedCode>Красный код</SmartDefense.Col.RedCode>
-
-<SmartDefense.Cat.Civilians>Гражданские</SmartDefense.Cat.Civilians>
-<SmartDefense.Cat.Combatants>Бойцы</SmartDefense.Cat.Combatants>
-<SmartDefense.Cat.Animals>Животные</SmartDefense.Cat.Animals>
-<SmartDefense.Cat.Mechs>Механоиды</SmartDefense.Cat.Mechs>
-
-<SmartDefense.Area.Unrestricted>Без ограничений</SmartDefense.Area.Unrestricted>
-
-<SmartDefense.Header.AdditionalOptions>Дополнительные опции</SmartDefense.Header.AdditionalOptions>
-<SmartDefense.Opt.ManualModeOnly>Полностью ручной режим (отключить авто-переключение DEFCON)</SmartDefense.Opt.ManualModeOnly>
-<SmartDefense.Opt.AutoDraftCombatants>Автоматически мобилизовать (Draft) бойцов при Красном коде</SmartDefense.Opt.AutoDraftCombatants>
-<SmartDefense.Opt.AutoToggleTurrets>Автоматически ставить задание на переключение турелей (колонисты делают это сами)</SmartDefense.Opt.AutoToggleTurrets>
-<SmartDefense.Opt.InstantTurretToggle>Мгновенное переключение турелей (без беготни колонистов)</SmartDefense.Opt.InstantTurretToggle>
-<SmartDefense.Opt.AutoRedOnRaid>Автоматически включать Красный код при появлении врагов на карте</SmartDefense.Opt.AutoRedOnRaid>
-<SmartDefense.Opt.AutoYellowOnRaidEnd>Автоматически снижать режим до Жёлтого при уничтожении/бегстве всех врагов</SmartDefense.Opt.AutoYellowOnRaidEnd>
-
-<SmartDefense.Col.Name>Имя</SmartDefense.Col.Name>
-<SmartDefense.Col.Role>Роль</SmartDefense.Col.Role>
-
-<SmartDefense.Role.Auto>Авто</SmartDefense.Role.Auto>
-<SmartDefense.Role.AutoCivilian>Авто (Граждан)</SmartDefense.Role.AutoCivilian>
-<SmartDefense.Role.AutoCombatant>Авто (Боец)</SmartDefense.Role.AutoCombatant>
-<SmartDefense.Role.CombatantAlways>Боец (Всегда)</SmartDefense.Role.CombatantAlways>
-<SmartDefense.Role.CivilianAlways>Гражданский (Всегда)</SmartDefense.Role.CivilianAlways>
+﻿<?xml version="1.0" encoding="utf-8"?>
+<LanguageData>
+	<SmartDefense.Msg.GreenSwitched>[SmartDefense] Режим переключен: Зеленый (Норма). Все поселенцы сняты с боевого контроля.</SmartDefense.Msg.GreenSwitched>
+	<SmartDefense.Msg.LevelSwitched>[SmartDefense] Режим переключен: {0}</SmartDefense.Msg.LevelSwitched>
+	<SmartDefense.Tip.Protocol>Протокол обороны: {0}</SmartDefense.Tip.Protocol>
+	<SmartDefense.DEFCON.Green>DEFCON: ЗЕЛЕНЫЙ (НОРМА)</SmartDefense.DEFCON.Green>
+	<SmartDefense.DEFCON.Yellow>DEFCON: ЖЕЛТЫЙ (УГРОЗА)</SmartDefense.DEFCON.Yellow>
+	<SmartDefense.DEFCON.Red>DEFCON: КРАСНЫЙ (ТРЕВОГА)</SmartDefense.DEFCON.Red>
+	<SmartDefense.DEFCON.Unknown>DEFCON: НЕИЗВЕСТНО</SmartDefense.DEFCON.Unknown>
+	<SmartDefense.Tab.Main>Главная</SmartDefense.Tab.Main>
+	<SmartDefense.Tab.Pawns>Поселенцы</SmartDefense.Tab.Pawns>
+	<SmartDefense.Tab.Animals>Животные</SmartDefense.Tab.Animals>
+	<SmartDefense.Tab.Mechs>Механоиды</SmartDefense.Tab.Mechs>
+	<SmartDefense.Header.QuickDEFCON>Быстрое управление DEFCON</SmartDefense.Header.QuickDEFCON>
+	<SmartDefense.Btn.GreenCode>Зеленый код</SmartDefense.Btn.GreenCode>
+	<SmartDefense.Btn.YellowCode>Желтый код</SmartDefense.Btn.YellowCode>
+	<SmartDefense.Btn.RedCode>Красный код</SmartDefense.Btn.RedCode>
+	<SmartDefense.Header.CategoryFallback>Зоны по умолчанию для категорий (Fallback)</SmartDefense.Header.CategoryFallback>
+	<SmartDefense.Btn.ResetDefaults>Сбросить зоны на умолчания</SmartDefense.Btn.ResetDefaults>
+	<SmartDefense.Msg.ResetDefaultsDone>[SmartDefense] Зоны по умолчанию сброшены на &#x27;Без ограничений&#x27;.</SmartDefense.Msg.ResetDefaultsDone>
+	<SmartDefense.Col.Category>Категория</SmartDefense.Col.Category>
+	<SmartDefense.Col.YellowCode>Жёлтый код</SmartDefense.Col.YellowCode>
+	<SmartDefense.Col.RedCode>Красный код</SmartDefense.Col.RedCode>
+	<SmartDefense.Cat.Civilians>Гражданские</SmartDefense.Cat.Civilians>
+	<SmartDefense.Cat.Combatants>Бойцы</SmartDefense.Cat.Combatants>
+	<SmartDefense.Cat.Animals>Животные</SmartDefense.Cat.Animals>
+	<SmartDefense.Cat.Mechs>Механоиды</SmartDefense.Cat.Mechs>
+	<SmartDefense.Area.Unrestricted>Без ограничений</SmartDefense.Area.Unrestricted>
+	<SmartDefense.Header.AdditionalOptions>Дополнительные опции</SmartDefense.Header.AdditionalOptions>
+	<SmartDefense.Opt.ManualModeOnly>Полностью ручной режим (отключить авто-переключение DEFCON)</SmartDefense.Opt.ManualModeOnly>
+	<SmartDefense.Opt.AutoDraftCombatants>Автоматически мобилизовать (Draft) бойцов при Красном коде</SmartDefense.Opt.AutoDraftCombatants>
+	<SmartDefense.Opt.AutoToggleTurrets>Автоматически ставить задание на переключение турелей (колонисты делают это сами)</SmartDefense.Opt.AutoToggleTurrets>
+	<SmartDefense.Opt.InstantTurretToggle>Мгновенное переключение турелей (без беготни колонистов)</SmartDefense.Opt.InstantTurretToggle>
+	<SmartDefense.Opt.AutoRedOnRaid>Автоматически включать Красный код при появлении врагов на карте</SmartDefense.Opt.AutoRedOnRaid>
+	<SmartDefense.Opt.AutoYellowOnRaidEnd>Автоматически снижать режим до Жёлтого при уничтожении/бегстве всех врагов</SmartDefense.Opt.AutoYellowOnRaidEnd>
+	<SmartDefense.Col.Name>Имя</SmartDefense.Col.Name>
+	<SmartDefense.Col.Role>Роль</SmartDefense.Col.Role>
+	<SmartDefense.Role.Auto>Авто</SmartDefense.Role.Auto>
+	<SmartDefense.Role.AutoCivilian>Авто (Граждан)</SmartDefense.Role.AutoCivilian>
+	<SmartDefense.Role.AutoCombatant>Авто (Боец)</SmartDefense.Role.AutoCombatant>
+	<SmartDefense.Role.Combatant>Боец</SmartDefense.Role.Combatant>
+	<SmartDefense.Role.Civilian>Гражданский</SmartDefense.Role.Civilian>
+	<SmartDefense.Role.CombatantAlways>Боец (Всегда)</SmartDefense.Role.CombatantAlways>
+	<SmartDefense.Role.CivilianAlways>Гражданский (Всегда)</SmartDefense.Role.CivilianAlways>
+	<SmartDefense.Window.Title>Smart Defense Protocols</SmartDefense.Window.Title>
+	<SmartDefense.Btn.Close>Закрыть</SmartDefense.Btn.Close>
+</LanguageData>
