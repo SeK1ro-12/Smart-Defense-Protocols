@@ -1,0 +1,47 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<LanguageData>
+	<SmartDefense.Msg.GreenSwitched>[SmartDefense] Switched to Green (Normal). All colonists have been released from combat control.</SmartDefense.Msg.GreenSwitched>
+	<SmartDefense.Msg.LevelSwitched>[SmartDefense] Switched to {0}</SmartDefense.Msg.LevelSwitched>
+	<SmartDefense.Tip.Protocol>Defense protocol: {0}</SmartDefense.Tip.Protocol>
+	<SmartDefense.DEFCON.Green>DEFCON: GREEN (NORMAL)</SmartDefense.DEFCON.Green>
+	<SmartDefense.DEFCON.Yellow>DEFCON: YELLOW (THREAT)</SmartDefense.DEFCON.Yellow>
+	<SmartDefense.DEFCON.Red>DEFCON: RED (ALERT)</SmartDefense.DEFCON.Red>
+	<SmartDefense.DEFCON.Unknown>DEFCON: UNKNOWN</SmartDefense.DEFCON.Unknown>
+	<SmartDefense.Tab.Main>Main</SmartDefense.Tab.Main>
+	<SmartDefense.Tab.Pawns>Colonists</SmartDefense.Tab.Pawns>
+	<SmartDefense.Tab.Animals>Animals</SmartDefense.Tab.Animals>
+	<SmartDefense.Tab.Mechs>Mechanoids</SmartDefense.Tab.Mechs>
+	<SmartDefense.Header.QuickDEFCON>Quick DEFCON Control</SmartDefense.Header.QuickDEFCON>
+	<SmartDefense.Btn.GreenCode>Green Code</SmartDefense.Btn.GreenCode>
+	<SmartDefense.Btn.YellowCode>Yellow Code</SmartDefense.Btn.YellowCode>
+	<SmartDefense.Btn.RedCode>Red Code</SmartDefense.Btn.RedCode>
+	<SmartDefense.Header.CategoryFallback>Default Areas by Category (Fallback)</SmartDefense.Header.CategoryFallback>
+	<SmartDefense.Btn.ResetDefaults>Reset Areas to Default</SmartDefense.Btn.ResetDefaults>
+	<SmartDefense.Msg.ResetDefaultsDone>[SmartDefense] Default areas reset to &#x27;Unrestricted&#x27;.</SmartDefense.Msg.ResetDefaultsDone>
+	<SmartDefense.Col.Category>Category</SmartDefense.Col.Category>
+	<SmartDefense.Col.YellowCode>Yellow Code</SmartDefense.Col.YellowCode>
+	<SmartDefense.Col.RedCode>Red Code</SmartDefense.Col.RedCode>
+	<SmartDefense.Cat.Civilians>Civilians</SmartDefense.Cat.Civilians>
+	<SmartDefense.Cat.Combatants>Combatants</SmartDefense.Cat.Combatants>
+	<SmartDefense.Cat.Animals>Animals</SmartDefense.Cat.Animals>
+	<SmartDefense.Cat.Mechs>Mechanoids</SmartDefense.Cat.Mechs>
+	<SmartDefense.Area.Unrestricted>Unrestricted</SmartDefense.Area.Unrestricted>
+	<SmartDefense.Header.AdditionalOptions>Additional Options</SmartDefense.Header.AdditionalOptions>
+	<SmartDefense.Opt.ManualModeOnly>Fully manual mode (disable automatic DEFCON switching)</SmartDefense.Opt.ManualModeOnly>
+	<SmartDefense.Opt.AutoDraftCombatants>Automatically draft combatants on Red Code</SmartDefense.Opt.AutoDraftCombatants>
+	<SmartDefense.Opt.AutoToggleTurrets>Automatically assign colonists to toggle turrets</SmartDefense.Opt.AutoToggleTurrets>
+	<SmartDefense.Opt.InstantTurretToggle>Instantly toggle turrets (no colonist work required)</SmartDefense.Opt.InstantTurretToggle>
+	<SmartDefense.Opt.AutoRedOnRaid>Automatically activate Red Code when enemies appear on the map</SmartDefense.Opt.AutoRedOnRaid>
+	<SmartDefense.Opt.AutoYellowOnRaidEnd>Automatically reduce to Yellow Code when all enemies are defeated or flee</SmartDefense.Opt.AutoYellowOnRaidEnd>
+	<SmartDefense.Col.Name>Name</SmartDefense.Col.Name>
+	<SmartDefense.Col.Role>Role</SmartDefense.Col.Role>
+	<SmartDefense.Role.Auto>Auto</SmartDefense.Role.Auto>
+	<SmartDefense.Role.AutoCivilian>Auto (Civilian)</SmartDefense.Role.AutoCivilian>
+	<SmartDefense.Role.AutoCombatant>Auto (Combatant)</SmartDefense.Role.AutoCombatant>
+	<SmartDefense.Role.Combatant>Combatant</SmartDefense.Role.Combatant>
+	<SmartDefense.Role.Civilian>Civilian</SmartDefense.Role.Civilian>
+	<SmartDefense.Role.CombatantAlways>Combatant (Always)</SmartDefense.Role.CombatantAlways>
+	<SmartDefense.Role.CivilianAlways>Civilian (Always)</SmartDefense.Role.CivilianAlways>
+	<SmartDefense.Window.Title>Smart Defense Protocols</SmartDefense.Window.Title>
+	<SmartDefense.Btn.Close>Close</SmartDefense.Btn.Close>
+</LanguageData>
