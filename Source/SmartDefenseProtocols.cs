@@ -630,9 +630,83 @@ namespace SmartDefenseProtocols
     /// </summary>
     public class MainButtonWorker_Defense : MainButtonWorker
     {
+        private static Texture2D cachedIcon;
+
+        private Texture2D RealIcon
+        {
+            get
+            {
+                if (cachedIcon == null)
+                {
+                    cachedIcon = ContentFinder<Texture2D>.Get(def.iconPath, true);
+                }
+
+                return cachedIcon;
+            }
+        }
+
+        public override void DoButton(Rect rect)
+        {
+            if (!Visible) return;
+
+            // RimWorld сам рисует стандартный синий фон, рамку и белую иконку.
+            base.DoButton(rect);
+
+            // Поверх стандартной иконки рисуем тот же щит, но уже цветом DEFCON.
+            Color statusColor;
+
+            switch (DefenseManager.CurrentAlert)
+            {
+                case AlertLevel.Green:
+                    statusColor = new Color(0.2f, 0.85f, 0.3f, 1f);
+                    break;
+
+                case AlertLevel.Yellow:
+                    statusColor = new Color(1f, 0.85f, 0.2f, 1f);
+                    break;
+
+                case AlertLevel.Red:
+                    statusColor = new Color(1f, 0.25f, 0.25f, 1f);
+                    break;
+
+                default:
+                    statusColor = Color.white;
+                    break;
+            }
+
+            // Квадратная область кнопки, чтобы щит не растягивался.
+            float size = rect.height;
+            Rect square = new Rect(
+                rect.center.x - size / 2f,
+                rect.y,
+                size,
+                size
+            );
+
+            Rect iconRect = square.ContractedBy(size * 0.22f);
+
+            Color previousColor = GUI.color;
+            GUI.color = statusColor;
+            Widgets.DrawTextureFitted(iconRect, RealIcon, 1f);
+            GUI.color = previousColor;
+
+            // Подсказка с текущим режимом.
+            if (Mouse.IsOver(rect))
+            {
+                TooltipHandler.TipRegion(
+                    rect,
+                    $"SmartDefense.Tip.Protocol".Translate(
+                        GetAlertStatusText(DefenseManager.CurrentAlert)
+                    )
+                );
+            }
+        }
+
         public override void Activate()
         {
-            Dialog_DefenseSettings window = Find.WindowStack.WindowOfType<Dialog_DefenseSettings>();
+            Dialog_DefenseSettings window =
+                Find.WindowStack.WindowOfType<Dialog_DefenseSettings>();
+
             if (window != null)
             {
                 Find.WindowStack.TryRemove(window);
@@ -643,33 +717,21 @@ namespace SmartDefenseProtocols
             }
         }
 
-        public override void DoButton(Rect rect)
-        {
-            base.DoButton(rect);
-
-            Color statusColor;
-            switch (DefenseManager.CurrentAlert)
-            {
-                case AlertLevel.Green: statusColor = new Color(0.2f, 0.85f, 0.3f, 0.9f); break;
-                case AlertLevel.Yellow: statusColor = new Color(1f, 0.85f, 0.2f, 0.9f); break;
-                case AlertLevel.Red: statusColor = new Color(1f, 0.25f, 0.25f, 0.9f); break;
-                default: statusColor = Color.white; break;
-            }
-
-            Rect indicatorRect = new Rect(rect.x + 3f, rect.yMax - 3f, rect.width - 6f, 2f);
-            UIHelper.DrawSolidColor(indicatorRect, statusColor);
-
-            TooltipHandler.TipRegion(rect, $"Протокол обороны: {GetAlertStatusText(DefenseManager.CurrentAlert)}");
-        }
-
         private string GetAlertStatusText(AlertLevel level)
         {
             switch (level)
             {
-                case AlertLevel.Green: return "SmartDefense.DEFCON.Green".Translate();
-                case AlertLevel.Yellow: return "SmartDefense.DEFCON.Yellow".Translate();
-                case AlertLevel.Red: return "SmartDefense.DEFCON.Red".Translate();
-                default: return "SmartDefense.DEFCON.Unknown".Translate();
+                case AlertLevel.Green:
+                    return "SmartDefense.DEFCON.Green".Translate();
+
+                case AlertLevel.Yellow:
+                    return "SmartDefense.DEFCON.Yellow".Translate();
+
+                case AlertLevel.Red:
+                    return "SmartDefense.DEFCON.Red".Translate();
+
+                default:
+                    return "SmartDefense.DEFCON.Unknown".Translate();
             }
         }
     }
@@ -732,7 +794,7 @@ namespace SmartDefenseProtocols
 
             Text.Font = GameFont.Medium;
             Text.Anchor = TextAnchor.MiddleLeft;
-            Widgets.Label(new Rect(headerRect.x + 15f, headerRect.y, 350f, headerRect.height), "Smart Defense Protocols");
+            Widgets.Label(new Rect(headerRect.x + 15f, headerRect.y, 350f, headerRect.height), "SmartDefense.Window.Title".Translate());
 
             Rect statusBadge = new Rect(headerRect.xMax - 320f, headerRect.y + 7f, 300f, 30f);
             DrawAlertStatusBadge(statusBadge);
@@ -784,19 +846,19 @@ namespace SmartDefenseProtocols
             {
                 case AlertLevel.Green:
                     badgeBg = new Color(0.12f, 0.4f, 0.18f, 0.9f);
-                    label = "DEFCON: ЗЕЛЕНЫЙ (НОРМА)";
+                    label = "SmartDefense.DEFCON.Green".Translate();
                     break;
                 case AlertLevel.Yellow:
                     badgeBg = new Color(0.55f, 0.42f, 0.08f, 0.9f);
-                    label = "DEFCON: ЖЕЛТЫЙ (УГРОЗА)";
+                    label = "SmartDefense.DEFCON.Yellow".Translate();
                     break;
                 case AlertLevel.Red:
                     badgeBg = new Color(0.6f, 0.12f, 0.12f, 0.9f);
-                    label = "DEFCON: КРАСНЫЙ (ТРЕВОГА)";
+                    label = "SmartDefense.DEFCON.Red".Translate();
                     break;
                 default:
                     badgeBg = Color.gray;
-                    label = "DEFCON: НЕИЗВЕСТНО";
+                    label = "SmartDefense.DEFCON.Unknown".Translate();
                     break;
             }
 
@@ -812,7 +874,7 @@ namespace SmartDefenseProtocols
         private void DrawTabs(Rect rect)
         {
             float tabWidth = (rect.width - 15f) / 4f;
-            string[] tabNames = new string[] { "Главная", "Поселенцы", "Животные", "Механоиды" };
+            string[] tabNames = new string[] { "SmartDefense.Tab.Main".Translate(), "SmartDefense.Tab.Pawns".Translate(), "SmartDefense.Tab.Animals".Translate(), "SmartDefense.Tab.Mechs".Translate() };
 
             for (int i = 0; i < 4; i++)
             {
@@ -855,25 +917,25 @@ namespace SmartDefenseProtocols
             listing.Begin(rect);
 
             Text.Font = GameFont.Medium;
-            Widgets.Label(listing.GetRect(30f), "Быстрое управление DEFCON");
+            Widgets.Label(listing.GetRect(30f), "SmartDefense.Header.QuickDEFCON".Translate());
             Text.Font = GameFont.Small;
 
             Rect btnGroup = listing.GetRect(40f);
             float btnW = (btnGroup.width - 20f) / 3f;
 
-            if (UIHelper.DrawStyledButton(new Rect(btnGroup.x, btnGroup.y, btnW, 40f), "Зеленый код",
+            if (UIHelper.DrawStyledButton(new Rect(btnGroup.x, btnGroup.y, btnW, 40f), "SmartDefense.Btn.GreenCode".Translate(),
                 new Color(0.12f, 0.3f, 0.15f, 0.85f), new Color(0.18f, 0.42f, 0.22f, 0.95f), new Color(0.3f, 0.7f, 0.35f)))
             {
                 DefenseManager.SetAlertLevel(AlertLevel.Green);
             }
 
-            if (UIHelper.DrawStyledButton(new Rect(btnGroup.x + btnW + 10f, btnGroup.y, btnW, 40f), "Желтый код",
+            if (UIHelper.DrawStyledButton(new Rect(btnGroup.x + btnW + 10f, btnGroup.y, btnW, 40f), "SmartDefense.Btn.YellowCode".Translate(),
                 new Color(0.35f, 0.28f, 0.05f, 0.85f), new Color(0.48f, 0.38f, 0.08f, 0.95f), new Color(0.85f, 0.7f, 0.2f)))
             {
                 DefenseManager.SetAlertLevel(AlertLevel.Yellow);
             }
 
-            if (UIHelper.DrawStyledButton(new Rect(btnGroup.x + (btnW + 10f) * 2, btnGroup.y, btnW, 40f), "Красный код",
+            if (UIHelper.DrawStyledButton(new Rect(btnGroup.x + (btnW + 10f) * 2, btnGroup.y, btnW, 40f), "SmartDefense.Btn.RedCode".Translate(),
                 new Color(0.38f, 0.08f, 0.08f, 0.85f), new Color(0.5f, 0.12f, 0.12f, 0.95f), new Color(0.85f, 0.25f, 0.25f)))
             {
                 DefenseManager.SetAlertLevel(AlertLevel.Red);
@@ -884,11 +946,11 @@ namespace SmartDefenseProtocols
 
             Rect titleWithResetRect = listing.GetRect(30f);
             Text.Font = GameFont.Medium;
-            Widgets.Label(new Rect(titleWithResetRect.x, titleWithResetRect.y, 450f, 30f), "Зоны по умолчанию для категорий (Fallback)");
+            Widgets.Label(new Rect(titleWithResetRect.x, titleWithResetRect.y, 450f, 30f), "SmartDefense.Header.CategoryFallback".Translate());
             Text.Font = GameFont.Small;
 
             Rect resetBtnRect = new Rect(titleWithResetRect.xMax - 210f, titleWithResetRect.y, 210f, 26f);
-            if (UIHelper.DrawStyledButton(resetBtnRect, "Сбросить зоны на умолчания", new Color(0.25f, 0.15f, 0.15f, 0.8f), new Color(0.4f, 0.2f, 0.2f, 0.95f), new Color(0.7f, 0.3f, 0.3f)))
+            if (UIHelper.DrawStyledButton(resetBtnRect, "SmartDefense.Btn.ResetDefaults".Translate(), new Color(0.25f, 0.15f, 0.15f, 0.8f), new Color(0.4f, 0.2f, 0.2f, 0.95f), new Color(0.7f, 0.3f, 0.3f)))
             {
                 comp.yellowDefaultCivilian = "";
                 comp.yellowDefaultCombatant = "";
@@ -898,44 +960,44 @@ namespace SmartDefenseProtocols
                 comp.redDefaultCombatant = "";
                 comp.redDefaultAnimals = "";
                 comp.redDefaultMechs = "";
-                Messages.Message("[SmartDefense] Зоны по умолчанию сброшены на 'Без ограничений'", MessageTypeDefOf.TaskCompletion, false);
+                Messages.Message("SmartDefense.Msg.ResetDefaultsDone".Translate(), MessageTypeDefOf.TaskCompletion, false);
             }
 
             Rect headerRow = listing.GetRect(28f);
-            Widgets.Label(new Rect(headerRow.x, headerRow.y, 200f, 25f), "Категория");
+            Widgets.Label(new Rect(headerRow.x, headerRow.y, 200f, 25f), "SmartDefense.Col.Category".Translate());
 
             Rect yellowHeader = new Rect(headerRow.x + 220f, headerRow.y, 200f, 25f);
             UIHelper.DrawSolidColor(yellowHeader, new Color(0.45f, 0.35f, 0.05f, 0.8f));
             UIHelper.DrawOutlinedRect(yellowHeader, Color.yellow * 0.8f);
             Text.Anchor = TextAnchor.MiddleCenter;
-            Widgets.Label(yellowHeader, "Жёлтый код");
+            Widgets.Label(yellowHeader, "SmartDefense.Col.YellowCode".Translate());
 
             Rect redHeader = new Rect(headerRow.x + 440f, headerRow.y, 200f, 25f);
             UIHelper.DrawSolidColor(redHeader, new Color(0.5f, 0.1f, 0.1f, 0.8f));
             UIHelper.DrawOutlinedRect(redHeader, Color.red * 0.8f);
-            Widgets.Label(redHeader, "Красный код");
+            Widgets.Label(redHeader, "SmartDefense.Btn.RedCode".Translate());
             Text.Anchor = TextAnchor.UpperLeft;
 
             listing.Gap(5f);
 
-            DrawCategoryDefaultRow(listing.GetRect(32f), "Гражданские", comp.yellowDefaultCivilian, a => comp.yellowDefaultCivilian = a, comp.redDefaultCivilian, a => comp.redDefaultCivilian = a);
-            DrawCategoryDefaultRow(listing.GetRect(32f), "Бойцы", comp.yellowDefaultCombatant, a => comp.yellowDefaultCombatant = a, comp.redDefaultCombatant, a => comp.redDefaultCombatant = a);
-            DrawCategoryDefaultRow(listing.GetRect(32f), "Животные", comp.yellowDefaultAnimals, a => comp.yellowDefaultAnimals = a, comp.redDefaultAnimals, a => comp.redDefaultAnimals = a);
-            DrawCategoryDefaultRow(listing.GetRect(32f), "Механоиды", comp.yellowDefaultMechs, a => comp.yellowDefaultMechs = a, comp.redDefaultMechs, a => comp.redDefaultMechs = a);
+            DrawCategoryDefaultRow(listing.GetRect(32f), "SmartDefense.Cat.Civilians".Translate(), comp.yellowDefaultCivilian, a => comp.yellowDefaultCivilian = a, comp.redDefaultCivilian, a => comp.redDefaultCivilian = a);
+            DrawCategoryDefaultRow(listing.GetRect(32f), "SmartDefense.Cat.Combatants".Translate(), comp.yellowDefaultCombatant, a => comp.yellowDefaultCombatant = a, comp.redDefaultCombatant, a => comp.redDefaultCombatant = a);
+            DrawCategoryDefaultRow(listing.GetRect(32f), "SmartDefense.Tab.Animals".Translate(), comp.yellowDefaultAnimals, a => comp.yellowDefaultAnimals = a, comp.redDefaultAnimals, a => comp.redDefaultAnimals = a);
+            DrawCategoryDefaultRow(listing.GetRect(32f), "SmartDefense.Tab.Mechs".Translate(), comp.yellowDefaultMechs, a => comp.yellowDefaultMechs = a, comp.redDefaultMechs, a => comp.redDefaultMechs = a);
 
             Rect sepRect2 = listing.GetRect(14f);
             Widgets.DrawLineHorizontal(sepRect2.x, sepRect2.y + 7f, listing.ColumnWidth);
 
             Text.Font = GameFont.Medium;
-            Widgets.Label(listing.GetRect(30f), "Дополнительные опции");
+            Widgets.Label(listing.GetRect(30f), "SmartDefense.Header.AdditionalOptions".Translate());
             Text.Font = GameFont.Small;
 
-            listing.CheckboxLabeled("Полностью ручной режим (отключить авто-переключение DEFCON)", ref DefenseSettings.ManualModeOnly);
-            listing.CheckboxLabeled("Автоматически мобилизовать (Draft) бойцов при Красном коде", ref DefenseSettings.AutoDraftCombatants);
-            listing.CheckboxLabeled("Автоматически ставить задание на переключение турелей (колонисты делают это сами)", ref DefenseSettings.AutoToggleTurrets);
-            listing.CheckboxLabeled("Мгновенное переключение турелей (без беготни колонистов)", ref DefenseSettings.InstantTurretToggle);
-            listing.CheckboxLabeled("Автоматически включать Красный код при появлении врагов на карте", ref DefenseSettings.AutoRedOnRaid);
-            listing.CheckboxLabeled("Автоматически снижать режим до Жёлтого при уничтожении/бегстве всех врагов", ref DefenseSettings.AutoYellowOnRaidEnd);
+            listing.CheckboxLabeled("SmartDefense.Opt.ManualModeOnly".Translate(), ref DefenseSettings.ManualModeOnly);
+            listing.CheckboxLabeled("SmartDefense.Opt.AutoDraftCombatants".Translate(), ref DefenseSettings.AutoDraftCombatants);
+            listing.CheckboxLabeled("SmartDefense.Opt.AutoToggleTurrets".Translate(), ref DefenseSettings.AutoToggleTurrets);
+            listing.CheckboxLabeled("SmartDefense.Opt.InstantTurretToggle".Translate(), ref DefenseSettings.InstantTurretToggle);
+            listing.CheckboxLabeled("SmartDefense.Opt.AutoRedOnRaid".Translate(), ref DefenseSettings.AutoRedOnRaid);
+            listing.CheckboxLabeled("SmartDefense.Opt.AutoYellowOnRaidEnd".Translate(), ref DefenseSettings.AutoYellowOnRaidEnd);
 
             listing.End();
         }
@@ -950,7 +1012,7 @@ namespace SmartDefenseProtocols
             Text.Anchor = TextAnchor.UpperLeft;
 
             Rect yellowBtn = new Rect(row.x + 220f, row.y + 2f, 200f, 28f);
-            if (UIHelper.DrawStyledButton(yellowBtn, string.IsNullOrEmpty(yellowVal) ? "Без ограничений" : yellowVal,
+            if (UIHelper.DrawStyledButton(yellowBtn, string.IsNullOrEmpty(yellowVal) ? "SmartDefense.Area.Unrestricted".Translate().ToString() : yellowVal,
                 new Color(0.16f, 0.14f, 0.05f, 0.7f), new Color(0.24f, 0.2f, 0.07f, 0.85f), new Color(0.6f, 0.5f, 0.2f, 0.6f)))
             {
                 List<FloatMenuOption> opts = GetAreaOptions(setYellow);
@@ -958,7 +1020,7 @@ namespace SmartDefenseProtocols
             }
 
             Rect redBtn = new Rect(row.x + 440f, row.y + 2f, 200f, 28f);
-            if (UIHelper.DrawStyledButton(redBtn, string.IsNullOrEmpty(redVal) ? "Без ограничений" : redVal,
+            if (UIHelper.DrawStyledButton(redBtn, string.IsNullOrEmpty(redVal) ? "SmartDefense.Area.Unrestricted".Translate().ToString() : redVal,
                 new Color(0.2f, 0.08f, 0.08f, 0.7f), new Color(0.3f, 0.1f, 0.1f, 0.85f), new Color(0.6f, 0.25f, 0.25f, 0.6f)))
             {
                 List<FloatMenuOption> opts = GetAreaOptions(setRed);
@@ -970,7 +1032,7 @@ namespace SmartDefenseProtocols
         {
             List<FloatMenuOption> opts = new List<FloatMenuOption>
             {
-                new FloatMenuOption("Без ограничений", () => onSelect(""))
+                new FloatMenuOption("SmartDefense.Area.Unrestricted".Translate(), () => onSelect(""))
             };
             Map map = Find.CurrentMap;
             if (map != null)
@@ -1015,12 +1077,12 @@ namespace SmartDefenseProtocols
             UIHelper.DrawOutlinedRect(header, new Color(0.3f, 0.4f, 0.5f, 0.6f));
 
             Text.Anchor = TextAnchor.MiddleLeft;
-            Widgets.Label(new Rect(header.x + 10f, header.y, 200f, header.height), "Имя");
+            Widgets.Label(new Rect(header.x + 10f, header.y, 200f, header.height), "SmartDefense.Col.Name".Translate());
 
             float curX = header.x + 210f;
             if (hasRoleColumn)
             {
-                Widgets.Label(new Rect(curX, header.y, 140f, header.height), "Роль");
+                Widgets.Label(new Rect(curX, header.y, 140f, header.height), "SmartDefense.Col.Role".Translate());
                 curX += 150f;
             }
 
@@ -1028,13 +1090,13 @@ namespace SmartDefenseProtocols
             UIHelper.DrawSolidColor(yellowH, new Color(0.45f, 0.35f, 0.05f, 0.8f));
             UIHelper.DrawOutlinedRect(yellowH, Color.yellow * 0.8f);
             Text.Anchor = TextAnchor.MiddleCenter;
-            Widgets.Label(yellowH, "Жёлтый код");
+            Widgets.Label(yellowH, "SmartDefense.Col.YellowCode".Translate());
 
             curX += 220f;
             Rect redH = new Rect(curX, header.y + 2f, 210f, 26f);
             UIHelper.DrawSolidColor(redH, new Color(0.5f, 0.1f, 0.1f, 0.8f));
             UIHelper.DrawOutlinedRect(redH, Color.red * 0.8f);
-            Widgets.Label(redH, "Красный код");
+            Widgets.Label(redH, "SmartDefense.Btn.RedCode".Translate());
 
             Text.Anchor = TextAnchor.UpperLeft;
         }
@@ -1064,9 +1126,9 @@ namespace SmartDefenseProtocols
             string roleLabel;
             switch (currentRole)
             {
-                case PawnRole.Combatant: roleLabel = "Боец"; break;
-                case PawnRole.Colonist: roleLabel = "Гражданский"; break;
-                default: roleLabel = DefenseManager.IsCombatant(p) ? "Авто (Боец)" : "Авто (Граждан)"; break;
+                case PawnRole.Combatant: roleLabel = "SmartDefense.Role.Combatant".Translate(); break;
+                case PawnRole.Colonist: roleLabel = "SmartDefense.Role.Civilian".Translate(); break;
+                default: roleLabel = DefenseManager.IsCombatant(p) ? "SmartDefense.Role.AutoCombatant".Translate() : "SmartDefense.Role.AutoCivilian".Translate(); break;
             }
 
             DrawDraggableCell(roleRect, 1, 0, index, roleLabel, currentRole,
@@ -1081,9 +1143,9 @@ namespace SmartDefenseProtocols
                 () => {
                     List<FloatMenuOption> options = new List<FloatMenuOption>
                     {
-                        new FloatMenuOption("Автоопределение", () => comp.pawnRoles[id] = PawnRole.Auto),
-                        new FloatMenuOption("Боец (Всегда)", () => comp.pawnRoles[id] = PawnRole.Combatant),
-                        new FloatMenuOption("Гражданский (Всегда)", () => comp.pawnRoles[id] = PawnRole.Colonist)
+                        new FloatMenuOption("SmartDefense.Role.Auto".Translate(), () => comp.pawnRoles[id] = PawnRole.Auto),
+                        new FloatMenuOption("SmartDefense.Role.CombatantAlways".Translate(), () => comp.pawnRoles[id] = PawnRole.Combatant),
+                        new FloatMenuOption("SmartDefense.Role.CivilianAlways".Translate(), () => comp.pawnRoles[id] = PawnRole.Colonist)
                     };
                     Find.WindowStack.Add(new FloatMenu(options));
                 }
@@ -1093,7 +1155,7 @@ namespace SmartDefenseProtocols
 
             string yellowArea = comp.pawnYellowAreas.TryGetValue(id, out var ya) ? ya : "";
             Rect yellowRect = new Rect(curX, row.y + 2f, 210f, 28f);
-            string yellowLabel = string.IsNullOrEmpty(yellowArea) ? "Без ограничений" : yellowArea;
+            string yellowLabel = string.IsNullOrEmpty(yellowArea) ? "SmartDefense.Area.Unrestricted".Translate().ToString() : yellowArea;
 
             DrawDraggableCell(yellowRect, 1, 1, index, yellowLabel, yellowArea,
                 (startIdx, endIdx, val) => {
@@ -1111,7 +1173,7 @@ namespace SmartDefenseProtocols
 
             string redArea = comp.pawnRedAreas.TryGetValue(id, out var ra) ? ra : "";
             Rect redRect = new Rect(curX, row.y + 2f, 210f, 28f);
-            string redLabel = string.IsNullOrEmpty(redArea) ? "Без ограничений" : redArea;
+            string redLabel = string.IsNullOrEmpty(redArea) ? "SmartDefense.Area.Unrestricted".Translate().ToString() : redArea;
 
             DrawDraggableCell(redRect, 1, 2, index, redLabel, redArea,
                 (startIdx, endIdx, val) => {
@@ -1198,7 +1260,7 @@ namespace SmartDefenseProtocols
 
             string yellowArea = yellowDict.TryGetValue(id, out var ya) ? ya : "";
             Rect yellowRect = new Rect(curX, row.y + 2f, 210f, 28f);
-            string yellowLabel = string.IsNullOrEmpty(yellowArea) ? "Без ограничений" : yellowArea;
+            string yellowLabel = string.IsNullOrEmpty(yellowArea) ? "SmartDefense.Area.Unrestricted".Translate().ToString() : yellowArea;
 
             DrawDraggableCell(yellowRect, tabIndex, 1, index, yellowLabel, yellowArea,
                 (startIdx, endIdx, val) => {
@@ -1216,7 +1278,7 @@ namespace SmartDefenseProtocols
 
             string redArea = redDict.TryGetValue(id, out var ra) ? ra : "";
             Rect redRect = new Rect(curX, row.y + 2f, 210f, 28f);
-            string redLabel = string.IsNullOrEmpty(redArea) ? "Без ограничений" : redArea;
+            string redLabel = string.IsNullOrEmpty(redArea) ? "SmartDefense.Area.Unrestricted".Translate().ToString() : redArea;
 
             DrawDraggableCell(redRect, tabIndex, 2, index, redLabel, redArea,
                 (startIdx, endIdx, val) => {
@@ -1400,7 +1462,7 @@ namespace SmartDefenseProtocols
             Settings = GetSettings<DefenseSettings>();
         }
 
-        public override string SettingsCategory() => "Smart Defense Protocols";
+        public override string SettingsCategory() => "SmartDefense.Window.Title".Translate();
 
         public override void DoSettingsWindowContents(Rect inRect)
         {
